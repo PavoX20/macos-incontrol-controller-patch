@@ -36,6 +36,53 @@ PATCHES: List[Tuple[str, str]] = [
     ("\xa9Microsoft Corporation Controller", "Microsoft GamePad-4"),
 ]
 
+DIRECTINPUT_UPDATE_ASSIGNED_JOYSTICKS_ORIGINAL_BODY = bytes.fromhex(
+    "133004003b010000a9010011289505000a0a06392e010000160b386c000000"
+    "7ef8060004079a3a110000007ef8060004077ee300000aa2384b000000160c"
+    "160d382700000006099a391b00000006099a7ef8060004079a6f8101000a"
+    "3907000000170c380d0000000917580d09068e693fd0ffffff083a0c000000"
+    "7ef8060004077ee300000aa20717580b077ef80600048e693f87ffffff161304"
+    "389c0000000611049a3a0500000038880000001613051613063824000000"
+    "7ef806000411069a0611049a6f8101000a39080000001713053814000000"
+    "11061758130611067ef80600048e693fceffffff11053a44000000161307382e"
+    "0000007ef806000411079a7ee300000a6f8101000a39110000007ef8060004"
+    "11070611049aa2381400000011071758130711077ef80600048e693fc4ffffff"
+    "1104175813041104068e693f5affffff2a"
+)
+
+DIRECTINPUT_UPDATE_ASSIGNED_JOYSTICKS_PATCHED_BODY = bytes.fromhex(
+    "133004003b010000a9010011289505000a0a062d012a160b2b2907068e693202"
+    "2b0506079a2d0e7ef8060004077ee300000aa22b0a7ef80600040706079aa2"
+    "0717580b077ef80600048e6932cd2a"
+    + ("00" * (len(DIRECTINPUT_UPDATE_ASSIGNED_JOYSTICKS_ORIGINAL_BODY) - 78))
+)
+
+
+def order_joysticks_by_index(joystick_names: List[str], slot_count: int) -> List[str]:
+    """Return joystick slots keyed by Unity joystick index, preserving duplicate names."""
+    ordered = [""] * slot_count
+    for index, joystick_name in enumerate(joystick_names[:slot_count]):
+        ordered[index] = joystick_name or ""
+    return ordered
+
+
+def patch_directinput_assignment(data: bytearray) -> bool:
+    """Patch Overcooked's DirectInputProvider to keep duplicate joystick names distinct."""
+    if DIRECTINPUT_UPDATE_ASSIGNED_JOYSTICKS_PATCHED_BODY in data:
+        log.info("  Already patched: DirectInputProvider joystick assignment")
+        return True
+
+    pos = data.find(DIRECTINPUT_UPDATE_ASSIGNED_JOYSTICKS_ORIGINAL_BODY)
+    if pos == -1:
+        log.info("  DirectInputProvider joystick assignment not found")
+        return False
+
+    data[pos:pos + len(DIRECTINPUT_UPDATE_ASSIGNED_JOYSTICKS_ORIGINAL_BODY)] = (
+        DIRECTINPUT_UPDATE_ASSIGNED_JOYSTICKS_PATCHED_BODY
+    )
+    log.info("  Patched: DirectInputProvider joystick assignment by joystick index")
+    return True
+
 
 def patch_string(data: bytearray, old_str: str, new_str: str) -> bool:
     """Replace a .NET User String in the DLL."""
@@ -83,8 +130,9 @@ def patch_dll(dll_path: Path) -> bool:
         data = bytearray(dll_path.read_bytes())
 
         patched = sum(1 for old, new in PATCHES if patch_string(data, old, new))
+        directinput_patched = patch_directinput_assignment(data)
 
-        if patched == 0:
+        if patched == 0 and not directinput_patched:
             log.error("No strings found to patch")
             return False
 
