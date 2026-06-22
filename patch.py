@@ -29,12 +29,20 @@ GAMES: List[Tuple[str, Path]] = [
     ("Overcooked! 2", STEAM_LIBRARY_PATH / "Overcooked! 2" / "Overcooked2.app" / DLL_RELATIVE_PATH),
 ]
 
-PATCHES: List[Tuple[str, str]] = [
+STEAM_INPUT_PATCHES: List[Tuple[str, str]] = [
     ("Microsoft Wireless 360 Controller", "Microsoft GamePad-1"),
     ("Mad Catz, Inc. Mad Catz FPS Pro GamePad", "Microsoft GamePad-2"),
     ("Mad Catz, Inc. MadCatz Call of Duty GamePad", "Microsoft GamePad-3"),
     ("\xa9Microsoft Corporation Controller", "Microsoft GamePad-4"),
 ]
+
+PLAYSTATION_PHYSICAL_PATCHES: List[Tuple[str, str]] = [
+    ("Unknown Wireless Controller", "Wireless Controller"),
+    ("Sony Computer Entertainment Wireless Controller", "DualSense Wireless Controller"),
+    ("Sony Interactive Entertainment Wireless Controller", "Control Viejo Pablo"),
+]
+
+PATCHES: List[Tuple[str, str]] = STEAM_INPUT_PATCHES + PLAYSTATION_PHYSICAL_PATCHES
 
 DIRECTINPUT_UPDATE_ASSIGNED_JOYSTICKS_ORIGINAL_BODY = bytes.fromhex(
     "133004003b010000a9010011289505000a0a06392e010000160b386c000000"
@@ -183,7 +191,9 @@ def main() -> int:
             all_succeeded = False
 
     if all_succeeded and not args.restore:
-        log.info("\nSuccess! Now enable Steam Input in each game's Steam properties.")
+        log.info("\nSuccess!")
+        log.info("For Steam virtual controllers, enable Steam Input in the game's Steam properties.")
+        log.info("For 2+ PlayStation controllers with movement cross-talk, disable Steam Input and use the physical controllers.")
 
     return 0 if all_succeeded else 1
 

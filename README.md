@@ -1,6 +1,6 @@
 # Steam Input Controller Patch for InControl Games (macOS)
 
-Fixes controller support on macOS by patching games to recognize Steam Input's virtual controllers.
+Fixes controller support on macOS by patching games to recognize Steam Input's virtual controllers and common physical PlayStation controllers.
 
 **[Download the latest release](https://github.com/fr-eed/tricky-towers-controller-fix/releases/latest)** - run the patcher app, no Python required.
 
@@ -14,6 +14,8 @@ Fixes controller support on macOS by patching games to recognize Steam Input's v
 
 These games use InControl for input handling. On macOS, Steam Input presents controllers as "Microsoft GamePad-1", "Microsoft GamePad-2", etc. These names don't match any built-in InControl profile, causing controllers to appear as "Unknown Device".
 
+Some multi-controller setups can also show cross-talk through Steam Input's virtual gamepads. For those setups, the patch can make InControl recognize physical PlayStation controllers directly so the game can be tested with Steam Input disabled.
+
 ## Solution
 
 Patches `Assembly-CSharp.dll` to replace Xbox360MacProfile's JoystickNames with Steam Input controller names:
@@ -24,6 +26,14 @@ Patches `Assembly-CSharp.dll` to replace Xbox360MacProfile's JoystickNames with 
 | Mad Catz, Inc. Mad Catz FPS Pro GamePad | Microsoft GamePad-2 |
 | Mad Catz, Inc. MadCatz Call of Duty GamePad | Microsoft GamePad-3 |
 | ©Microsoft Corporation Controller | Microsoft GamePad-4 |
+
+It also patches PlayStation 4 macOS profile names for physical controllers:
+
+| Original | Replacement |
+|----------|-------------|
+| Unknown Wireless Controller | Wireless Controller |
+| Sony Computer Entertainment Wireless Controller | DualSense Wireless Controller |
+| Sony Interactive Entertainment Wireless Controller | Control Viejo Pablo |
 
 ## Usage
 
@@ -46,9 +56,14 @@ python3 patch.py --restore /path/to/dll # Restore specific DLL
 
 ### After Patching
 
-Enable Steam Input:
+For Steam Input virtual controllers:
 1. Steam -> Right-click the game -> Properties -> Controller
 2. Select "Enable Steam Input"
+
+For two or more PlayStation controllers if movement cross-talk appears:
+1. Steam -> Right-click the game -> Properties -> Controller
+2. Select "Disable Steam Input"
+3. Connect the PlayStation controllers before launching the game
 
 ## Tested With
 
@@ -58,7 +73,8 @@ Enable Steam Input:
 
 ## Notes
 
-- Supports up to 4 controllers
+- Supports up to 4 Steam Input virtual controllers
+- Includes a physical PlayStation controller path for multi-controller troubleshooting
 - Backup created automatically (`Assembly-CSharp.dll.bak`)
 - Game updates will overwrite the patch
 - See `docs/` for technical details

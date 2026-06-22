@@ -232,7 +232,10 @@ class PatcherApp:
             self.restore_btn.config(state="normal")
             messagebox.showinfo(
                 "Success",
-                "Patch applied!\n\nNow enable Steam Input:\nSteam -> Game -> Properties -> Controller"
+                "Patch applied!\n\n"
+                "For Steam virtual controllers: enable Steam Input.\n\n"
+                "For 2+ PlayStation controllers with movement cross-talk: disable Steam Input "
+                "and connect the controllers before launching the game."
             )
         else:
             self.status.config(text="Patch failed", foreground="red")

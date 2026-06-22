@@ -9,7 +9,8 @@ Can also patch any other game that was made with Unity that used InControl packa
 3. Patcher auto detects installed games from the default Steam library folder (~/Library/Application Support/Steam/steamapps/common). 
 If multiple games are found, select which to patch. If your game is installed in another Steam library or elsewhere, select the .app manually.
 4. Click "Patch"
-5. Enable Steam Input: Steam -> Right-click the game -> Properties -> Controller -> Enable Steam Input
+5. For Steam virtual controllers: Steam -> Right-click the game -> Properties -> Controller -> Enable Steam Input
+6. For 2+ PlayStation controllers with movement cross-talk: use the same Steam Controller menu and choose Disable Steam Input, then connect the controllers before launching the game.
 
 To restore original: run the app again and click "Restore"
 
