@@ -67,21 +67,8 @@ def order_joysticks_by_index(joystick_names: List[str], slot_count: int) -> List
 
 
 def patch_directinput_assignment(data: bytearray) -> bool:
-    """Patch Overcooked's DirectInputProvider to keep duplicate joystick names distinct."""
-    if DIRECTINPUT_UPDATE_ASSIGNED_JOYSTICKS_PATCHED_BODY in data:
-        log.info("  Already patched: DirectInputProvider joystick assignment")
-        return True
-
-    pos = data.find(DIRECTINPUT_UPDATE_ASSIGNED_JOYSTICKS_ORIGINAL_BODY)
-    if pos == -1:
-        log.info("  DirectInputProvider joystick assignment not found")
-        return False
-
-    data[pos:pos + len(DIRECTINPUT_UPDATE_ASSIGNED_JOYSTICKS_ORIGINAL_BODY)] = (
-        DIRECTINPUT_UPDATE_ASSIGNED_JOYSTICKS_PATCHED_BODY
-    )
-    log.info("  Patched: DirectInputProvider joystick assignment by joystick index")
-    return True
+    """DirectInput IL patch is disabled; Unity 2017 Mono rejects the rewritten body."""
+    return False
 
 
 def patch_string(data: bytearray, old_str: str, new_str: str) -> bool:
@@ -130,7 +117,7 @@ def patch_dll(dll_path: Path) -> bool:
         data = bytearray(dll_path.read_bytes())
 
         patched = sum(1 for old, new in PATCHES if patch_string(data, old, new))
-        directinput_patched = patch_directinput_assignment(data)
+        directinput_patched = False
 
         if patched == 0 and not directinput_patched:
             log.error("No strings found to patch")
